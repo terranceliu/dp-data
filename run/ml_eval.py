@@ -44,7 +44,7 @@ def get_args():
    parser = argparse.ArgumentParser()
    parser.add_argument('--dataset', type=str)
    parser.add_argument('--target', type=str, default=None)
-   parser.add_argument('--idxs_dir', type=str)
+   parser.add_argument('--train_test_split_dir', type=str)
    parser.add_argument('--data_dir_root', type=str, default='./datasets/preprocessed')
    parser.add_argument('--models', nargs='+', type=str, default=None)
    parser.add_argument('--seed', type=int, default=0)
@@ -54,8 +54,8 @@ def get_args():
 
 args = get_args()
 
-data_train = get_dataset(args.dataset, root_path=args.data_dir_root, idxs_path=f'{args.idxs_dir}/train')
-data_test = get_dataset(args.dataset, root_path=args.data_dir_root, idxs_path=f'{args.idxs_dir}/test')
+data_train = get_dataset(args.dataset, root_path=args.data_dir_root, idxs_path=f'{args.train_test_split_dir}/train')
+data_test = get_dataset(args.dataset, root_path=args.data_dir_root, idxs_path=f'{args.train_test_split_dir}/test')
 
 domain = data_train.domain
 target = domain.attrs[-1] if args.target is None else args.target

@@ -25,5 +25,5 @@ We also provide code for training classifiers on such data. For example,
 ````
 DATASET=adult
 MODELS='DecisionTree KNN LogisticRegression LinearSVC RandomForest GradientBoosting XGBoost'
-python run/ml_eval.py --dataset $DATASET --idxs_dir original --models $MODELS
+python run/ml_eval.py --dataset $DATASET --train_test_split_dir original --models $MODELS
 ````
