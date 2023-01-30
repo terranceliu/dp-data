@@ -189,7 +189,7 @@ if __name__ == '__main__':
         print(task, state)
         df_preprocessed, domain, preprocessor = preprocess_acs(task, state, year=args.year, horizon=args.horizon)
 
-        data_dir = f'./datasets/folktables/{args.horizon}/folktables_{args.year}_{task}_{state}'
+        data_dir = f'./datasets/preprocessed/folktables/{args.horizon}/folktables_{args.year}_{task}_{state}'
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
 

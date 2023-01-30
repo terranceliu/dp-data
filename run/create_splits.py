@@ -7,7 +7,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str)
-    parser.add_argument('--data_dir_root', type=str, default='./datasets')
+    parser.add_argument('--data_dir_root', type=str, default='./datasets/preprocessed')
     parser.add_argument('--frac', type=float, default=0.8)
     parser.add_argument('--seeds', nargs='+', type=int, default=[0])
     return parser.parse_args()

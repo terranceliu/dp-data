@@ -51,7 +51,7 @@ def get_args():
    parser.add_argument('--dataset', type=str)
    parser.add_argument('--target', type=str, default=None)
    parser.add_argument('--idxs_dir', type=str)
-   parser.add_argument('--data_dir_root', type=str, default='./datasets')
+   parser.add_argument('--data_dir_root', type=str, default='./datasets/preprocessed')
    parser.add_argument('--models', nargs='+', type=str, default=None)
    parser.add_argument('--seed', type=int, default=0)
    parser.add_argument('--grid_search', action='store_true')

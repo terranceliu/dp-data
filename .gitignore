@@ -1,6 +1,8 @@
+.DS_Store 
 *.pyc
 __pycache__
-.DS_Store 
 *.ipynb_checkpoints
 *.egg-info/
-.idea/*
+*.csv
+
+./datasets/raw/folktables

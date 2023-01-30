@@ -43,7 +43,7 @@ df_test_preprocessed = preprocessor.transform(df_test)
 df_preprocessed = preprocessor.transform(df)
 
 # Save files
-data_dir = f'./datasets/{data_name}/'
+data_dir = f'./datasets/preprocessed/{data_name}/'
 if not os.path.exists(data_dir):
     os.makedirs(data_dir)
 

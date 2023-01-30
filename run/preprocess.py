@@ -39,7 +39,7 @@ domain[attrs_dict['target']] = domain.pop(attrs_dict['target'])
 df_preprocessed = preprocessor.transform(df)
 
 # Save files
-data_dir = f'./datasets/{data_name}/'
+data_dir = f'./datasets/preprocessed/{data_name}/'
 if not os.path.exists(data_dir):
     os.makedirs(data_dir)
 
