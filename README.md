@@ -20,7 +20,7 @@ Scripts for preprocessing individual datasets can be found in `scripts`. The fol
 ````
 ./preprocess_all.sh
 ````
-Note that the `credit` dataset must fitst be downloaded manually from [here](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) and moved to `datasets/raw/credit.csv`
+Note that the `credit` dataset must first be downloaded manually from [here](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) and moved to `datasets/raw/credit.csv`
 
 We also provide code for training classifiers on such data. For example,
 ````
