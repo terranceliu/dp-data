@@ -8,12 +8,6 @@ from sklearn.metrics import make_scorer, f1_score, roc_auc_score, average_precis
 from src import get_dataset
 from src.ml_models import MODELS, MODEL_PARAMS
 
-'''
-DATASET=cervical
-MODELS='DecisionTree KNN LogisticRegression LinearSVC RandomForest GradientBoosting XGBoost'
-python run/ml_eval.py --dataset $DATASET --idxs_dir seed0 --models $MODELS
-'''
-
 def get_train_cols(domain) :
    train_cols = [c for c in domain.attrs if c != target]
    train_cols_num = [c for c in train_cols if domain[c] == 1]
@@ -79,7 +73,7 @@ scorers['accuracy'] = make_scorer(accuracy_score)
 
 X_train, y_train, X_test, y_test = get_train_test(domain, data_train.df, data_test.df, target)
 
-mode = st.mode(y_train).mode[0]
+mode = st.mode(y_train, keepdims=True).mode[0]
 test_acc_maj = (y_test == mode).mean()
 print(f'Majority accuracy: {test_acc_maj}')
 

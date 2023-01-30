@@ -20,3 +20,10 @@ Scripts for preprocessing individual datasets can be found in `scripts`. The fol
 ````
 ./preprocess_all.sh
 ````
+
+We also provide code for training classifiers on such data. For example,
+````
+DATASET=adult
+MODELS='DecisionTree KNN LogisticRegression LinearSVC RandomForest GradientBoosting XGBoost'
+python run/ml_eval.py --dataset $DATASET --idxs_dir original --models $MODELS
+````
