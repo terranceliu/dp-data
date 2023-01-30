@@ -5,4 +5,4 @@ __pycache__
 *.egg-info/
 *.csv
 
-./datasets/raw/folktables
+./datasets/raw/folktables/*
