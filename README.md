@@ -13,3 +13,10 @@ conda activate dp-data
 pip install --upgrade pip
 pip install -e .
 ````
+
+# Execution
+
+Scripts for preprocessing individual datasets can be found in `scripts`. The following script will preprocess all available datasets.
+````
+./preprocess_all.sh
+````
