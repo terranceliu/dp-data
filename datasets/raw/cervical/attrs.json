@@ -1,0 +1,7 @@
+{"categorical": ["Smokes", "Hormonal_Contraceptives", "IUD", "STDs", "STDs_condylomatosis", "STDs_cervical_condylomatosis", "STDs_vaginal_condylomatosis", "STDs_vulvo-perineal_condylomatosis", 
+"STDs_syphilis", "STDs_pelvic_inflammatory_disease", "STDs_genital_herpes", "STDs_molluscum_contagiosum", "STDs_AIDS", "STDs_HIV", "STDs_Hepatitis_B", "STDs_HPV", "Dx_Cancer", "Dx_CIN", "Dx_HPV", 
+"Dx", "Hinselmann", "Schiller", "Citology", "Biopsy"],
+ "numerical": ["Age", "Number_of_sexual_partners", "First_sexual_intercourse", "Num_of_pregnancies", "Smokes_(years)", "Smokes_(packs/year)", "Hormonal_Contraceptives_(years)", "IUD_(years)", "STDs_(number)", "STDs_Number_of_diagnosis", "STDs_Time_since_first_diagnosis", "STDs_Time_since_last_diagnosis"],
+ "target": ""
+}
+

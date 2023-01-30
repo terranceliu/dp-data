@@ -1,0 +1,4 @@
+ {"categorical": ["workclass", "education", "marital-status", "occupation","relationship", "race", "sex", "native-country", "income>50K"],
+ "numerical": ["age", "capital-gain", "capital-loss", "hours-per-week"],
+ "target": "income>50K"
+ }
