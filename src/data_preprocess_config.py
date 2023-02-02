@@ -46,14 +46,14 @@ def get_config_from_json(attrs_dict):
     attrs_cat = attrs_dict['categorical']
     attrs_num = attrs_dict['numerical']
 
-    preprocessor = DataPreprocessingConfig.initialize(attrs_cat=attrs_cat, 
-                                                      attrs_num=attrs_num, 
-                                                      attrs_num_discretized=attrs_num_discretized,
-                                                      mappings_cat = mappings_cat,
-                                                      mappings_num = mappings_num,
-                                                      mappings_num_discretized = mappings_num_discretized
-                                                      )
-    return preprocessor
+    config = DataPreprocessingConfig.initialize(attrs_cat=attrs_cat, 
+                                                attrs_num=attrs_num, 
+                                                attrs_num_discretized=attrs_num_discretized,
+                                                mappings_cat = mappings_cat,
+                                                mappings_num = mappings_num,
+                                                mappings_num_discretized = mappings_num_discretized
+                                                )
+    return config
 
 
 # elif data_name == 'adult_prediscretized':
