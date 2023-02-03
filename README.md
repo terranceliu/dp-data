@@ -22,9 +22,11 @@ Scripts for preprocessing individual datasets can be found in `scripts`. The fol
 ````
 Note that the `credit` dataset must first be downloaded manually from [here](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) and moved to `datasets/raw/credit.csv`
 
-We also provide code for training classifiers on such data. For example,
+We also provide code for training classifiers on such data (the above script creates 80-20 train-test splits). For example,
 ````
 DATASET=adult
 MODELS='DecisionTree KNN LogisticRegression LinearSVC RandomForest GradientBoosting XGBoost'
 python run/ml_eval.py --dataset $DATASET --train_test_split_dir original --models $MODELS
 ````
+
+Please also note that the Census Privacy Protected Microdata Files (PPMF) are constructed with 50-50 train-test splits. The purpose of such splits is to produce baseline results for the experiments found in [this work](https://arxiv.org/abs/2211.03128). There is no natural classification problem for this data, but you are free to construct your own by specifying a `target` attribute when running `run/ml_eval.py`.
