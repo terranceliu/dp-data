@@ -31,7 +31,7 @@ python run/ml_eval.py --dataset $DATASET --train_test_split_dir original --model
 
 ## Census Privacy Protected Microdata Files (PPMF)
 
-Our scripts generate a large set of datasets from the PPMF raw source data, and the overall preprocessing pipeline may take several hours. We therefore do not include them in `preprocess_all.sh`. To obtain them, you can instead run the following scripts separately.
+Our scripts generate a large set of datasets from the [PPMF](https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance/2020-das-development.html) raw source data, and the overall preprocessing pipeline may take several hours. We therefore do not include them in `preprocess_all.sh`. To obtain them, you can instead run the following scripts separately.
 ````
 ./scripts/ppmf/tracts.sh
 ./scripts/ppmf/blocks.sh
