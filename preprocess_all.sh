@@ -6,3 +6,5 @@
 ./scripts/cervical.sh
 ./scripts/credit.sh
 ./scripts/folktables.sh
+./scripts/ppmf/tracts.sh
+./scripts/ppmf/blocks.sh
