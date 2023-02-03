@@ -7,7 +7,7 @@ setup(
     url='https://github.com/terranceliu/dp-data',
     author='Terrance Liu',
     license='MIT',
-    packages=['src'],
+    packages=['dp_data'],
     zip_safe=False,
     install_requires=['numpy', 'pandas', 'scipy', 'scikit_learn',
                      'tqdm', 'folktables', 'xgboost', 'lightgbm',],

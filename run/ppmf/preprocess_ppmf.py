@@ -4,8 +4,8 @@ import pickle
 import argparse
 import pandas as pd
 
-from src.ppmf import GeoLocation, select_ppmf_geolocation, get_census_schema_and_data
-from src import DataPreprocessor, DataPreprocessingConfig
+from dp_data.ppmf import GeoLocation, select_ppmf_geolocation, get_census_schema_and_data
+from dp_data import DataPreprocessor, DataPreprocessingConfig
 
 def         get_preprocessor(schema):
     attrs_cat = schema.column_names

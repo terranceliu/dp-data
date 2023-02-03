@@ -8,7 +8,7 @@ import itertools
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from src import DataPreprocessingConfig, DataPreprocessor
+from dp_data import DataPreprocessingConfig, DataPreprocessor
 
 from folktables import BasicProblem
 from folktables import ACSDataSource, ACSEmployment, ACSIncome, ACSPublicCoverage, ACSTravelTime, ACSMobility

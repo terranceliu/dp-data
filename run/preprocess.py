@@ -4,7 +4,7 @@ import pickle
 import argparse
 import numpy as np
 import pandas as pd
-from src import cleanup, DataPreprocessor, get_config_from_json
+from dp_data import cleanup, DataPreprocessor, get_config_from_json
 
 def get_args():
     parser = argparse.ArgumentParser()

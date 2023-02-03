@@ -5,8 +5,8 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer, f1_score, roc_auc_score, average_precision_score, accuracy_score
 
-from src import get_dataset
-from src.ml_models import MODELS, MODEL_PARAMS
+from dp_data import get_dataset
+from dp_data.ml_models import MODELS, MODEL_PARAMS
 
 def get_train_cols(domain) :
    train_cols = [c for c in domain.attrs if c != target]

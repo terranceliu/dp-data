@@ -2,7 +2,7 @@ import os
 import json
 import numpy as np
 import pandas as pd
-from src import Dataset, Domain
+from dp_data import Dataset, Domain
 
 def get_domain(data_name, root_path='./datasets/'):
     domain_path = os.path.join(root_path, f'{data_name}/domain.json')

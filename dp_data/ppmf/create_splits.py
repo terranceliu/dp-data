@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import argparse
-from src import get_dataset
+from dp_data import get_dataset
 
 def get_args():
     parser = argparse.ArgumentParser()
