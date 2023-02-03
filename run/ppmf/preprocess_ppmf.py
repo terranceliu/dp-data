@@ -4,10 +4,10 @@ import pickle
 import argparse
 import pandas as pd
 
-from src.ppmf import GeoLocation, select_ppmf_geolocation, get_census_schema_and_data, build_census_queries
+from src.ppmf import GeoLocation, select_ppmf_geolocation, get_census_schema_and_data
 from src import DataPreprocessor, DataPreprocessingConfig
 
-def get_preprocessor(schema):
+def         get_preprocessor(schema):
     attrs_cat = schema.column_names
     mappings_cat = dict(zip(schema.column_names, schema.column_values))
     config = DataPreprocessingConfig.initialize(attrs_cat=attrs_cat,
@@ -64,7 +64,6 @@ for geoid in geoids:
         
     geolocation = GeoLocation.parse_geoid(geoid)
     ppmf = select_ppmf_geolocation(ppmf_orig, geolocation)
-
     schema, ppmf = get_census_schema_and_data(ppmf, ignore_TABBLK=geolocation.type()=='block')
     preprocessor = get_preprocessor(schema)
     df_preprocessed = preprocessor.fit_transform(ppmf)

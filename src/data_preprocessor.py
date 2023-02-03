@@ -161,7 +161,7 @@ class DataPreprocessor():
 
     ##### transform functions ######
     def fit(self, df):
-        df.reset_index(drop=True, inplace=True)
+        df = df.reset_index(drop=True)
         self.fit_cat(df)
         self.fit_num(df)
         self.fit_num_discretized(df)

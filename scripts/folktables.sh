@@ -16,6 +16,6 @@ do
     do  
         DATASET=folktables_${YEAR}_${TASK}_${STATE}
         echo $DATASET
-        python run/create_splits.py --data_dir_root ./datasets/folktables/1-Year --dataset $DATASET --seeds $SEEDS
+        python run/create_splits.py --data_dir_root ./datasets/preprocessed/folktables/1-Year --dataset $DATASET --seeds $SEEDS
     done
 done

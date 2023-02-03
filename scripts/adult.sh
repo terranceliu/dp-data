@@ -8,6 +8,3 @@ SEEDS=$(seq 0 4)
 
 python run/preprocess_train_test.py --dataset $DATASET
 python run/create_splits.py --dataset $DATASET --seeds $SEEDS
-
-# python run/preprocess_train_test.py --dataset $DATASET --target $TARGET --prediscretized
-# python run/create_splits.py --dataset ${DATASET}_prediscretized --seeds $SEEDS
