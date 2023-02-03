@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# 2021-06-08
+URL=https://www2.census.gov/programs-surveys/decennial/2020/program-management/data-product-planning/2010-demonstration-data-products/01-Redistricting_File--PL_94-171/2021-06-08_ppmf_Production_Settings/2021-06-08-ppmf_P.csv
+curl -o "2021-06-08-ppmf_P.csv" $URL
+
 # 2020-05-27
 URL=https://www2.census.gov/programs-surveys/decennial/2020/program-management/data-product-planning/2010-demonstration-data-products/01-Redistricting_File--PL_94-171/2020-05-27_ppmf/2020-05-27-ppmf.csv
 FILE=./datasets/raw/ppmf/ppmf.csv

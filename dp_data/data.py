@@ -4,13 +4,13 @@ import numpy as np
 import pandas as pd
 from dp_data import Dataset, Domain
 
-def get_domain(data_name, root_path='./datasets/'):
+def get_domain(data_name, root_path='./datasets/preprocessed'):
     domain_path = os.path.join(root_path, f'{data_name}/domain.json')
     config = json.load(open(domain_path))
     domain = Domain(config.keys(), config.values())
     return domain
 
-def get_data(data_name, filename='data', root_path='./datasets/', idxs_path=None):
+def get_data(data_name, filename='data', root_path='./datasets/preprocessed', idxs_path=None):
     data_path = os.path.join(root_path, f'{data_name}')
     df_path = os.path.join(data_path, f'{filename}.csv')
     df = pd.read_csv(df_path)
@@ -20,7 +20,7 @@ def get_data(data_name, filename='data', root_path='./datasets/', idxs_path=None
         df = df.loc[idxs].reset_index(drop=True)
     return df
 
-def get_dataset(data_name, filename='data', root_path='./datasets/', idxs_path=None, ignore_numerical=False):
+def get_dataset(data_name, filename='data', root_path='./datasets/preprocessed', idxs_path=None, ignore_numerical=False):
     domain = get_domain(data_name, root_path=root_path)
     df = get_data(data_name, filename=filename, root_path=root_path, idxs_path=idxs_path)
     data = Dataset(df, domain)
