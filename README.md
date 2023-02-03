@@ -20,9 +20,13 @@ Scripts for preprocessing individual datasets can be found in `scripts`. The fol
 ````
 ./preprocess_all.sh
 ````
-Note that the `credit` dataset must first be downloaded manually from [here](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) and moved to `datasets/raw/credit.csv`
+Note that the `credit` dataset must be downloaded manually from [here](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud) and moved to `datasets/raw/credit.csv`. Please do this first, and then run the following command separately.
+````
+./scripts/credit.sh
+````
 
-We also provide code for training classifiers on such data (the above script creates 80-20 train-test splits). For example,
+## Running simple classification baselines
+We provide a script for training classifiers our preprocessed datasets. Our scripts by default creates 80-20 train-test splits. An example of how to use this code can be found below:
 ````
 DATASET=adult
 MODELS='DecisionTree KNN LogisticRegression LinearSVC RandomForest GradientBoosting XGBoost'
