@@ -26,7 +26,7 @@ Note that the `credit` dataset must be downloaded manually from [here](https://w
 ````
 
 ## Running simple classification baselines
-We provide a script for training classifiers our preprocessed datasets. Our scripts by default creates 80-20 train-test splits. An example of how to use this code can be found below:
+We provide code for training classifiers on our preprocessed datasets. Our scripts by default create 80-20 train-test splits. An example of how to use this code can be found below:
 ````
 DATASET=adult
 MODELS='DecisionTree KNN LogisticRegression LinearSVC RandomForest GradientBoosting XGBoost'
