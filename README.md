@@ -16,7 +16,7 @@ pip install -e .
 
 # Execution
 
-Scripts for preprocessing individual datasets can be found in `scripts`. The following script will preprocess all available datasets.
+Scripts for preprocessing individual datasets can be found in `scripts`. The following script will preprocess the available datasets.
 ````
 ./preprocess_all.sh
 ````
