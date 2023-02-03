@@ -14,6 +14,8 @@ class Domain:
         self.attrs = tuple(attrs)
         self.shape = tuple(shape)
         self.config = dict(zip(attrs, shape))
+        self.attrs_cat = tuple([attr for attr in self.attrs if self[attr] != 1])
+        self.attrs_num = tuple([attr for attr in self.attrs if self[attr] == 1])
 
     @staticmethod
     def fromdict(config):

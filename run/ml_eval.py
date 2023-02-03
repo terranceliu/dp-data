@@ -46,6 +46,7 @@ def get_args():
    parser.add_argument('--target', type=str, default=None)
    parser.add_argument('--train_test_split_dir', type=str)
    parser.add_argument('--data_dir_root', type=str, default='./datasets/preprocessed')
+   parser.add_argument('--ignore_numerical', action='store_true')
    parser.add_argument('--models', nargs='+', type=str, default=None)
    parser.add_argument('--seed', type=int, default=0)
    parser.add_argument('--grid_search', action='store_true')
@@ -54,8 +55,10 @@ def get_args():
 
 args = get_args()
 
-data_train = get_dataset(args.dataset, root_path=args.data_dir_root, idxs_path=f'{args.train_test_split_dir}/train')
-data_test = get_dataset(args.dataset, root_path=args.data_dir_root, idxs_path=f'{args.train_test_split_dir}/test')
+data_train = get_dataset(args.dataset, root_path=args.data_dir_root, 
+                         idxs_path=f'{args.train_test_split_dir}/train', ignore_numerical=args.ignore_numerical)
+data_test = get_dataset(args.dataset, root_path=args.data_dir_root, 
+                        idxs_path=f'{args.train_test_split_dir}/test', ignore_numerical=args.ignore_numerical)
 
 domain = data_train.domain
 target = domain.attrs[-1] if args.target is None else args.target

@@ -20,7 +20,10 @@ def get_data(data_name, filename='data', root_path='./datasets/', idxs_path=None
         df = df.loc[idxs].reset_index(drop=True)
     return df
 
-def get_dataset(data_name, filename='data', root_path='./datasets/', idxs_path=None):
+def get_dataset(data_name, filename='data', root_path='./datasets/', idxs_path=None, ignore_numerical=False):
     domain = get_domain(data_name, root_path=root_path)
     df = get_data(data_name, filename=filename, root_path=root_path, idxs_path=idxs_path)
-    return Dataset(df, domain)
+    data = Dataset(df, domain)
+    if ignore_numerical:
+        data = data.project(domain.attrs_cat)
+    return data
