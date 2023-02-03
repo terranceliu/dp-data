@@ -29,4 +29,12 @@ MODELS='DecisionTree KNN LogisticRegression LinearSVC RandomForest GradientBoost
 python run/ml_eval.py --dataset $DATASET --train_test_split_dir original --models $MODELS
 ````
 
-Please also note that the Census Privacy Protected Microdata Files (PPMF) are constructed with 50-50 train-test splits. The purpose of such splits is to produce baseline results for the experiments found in [this work](https://arxiv.org/abs/2211.03128). There is no natural classification problem for this data, but you are free to construct your own by specifying a `target` attribute when running `run/ml_eval.py`.
+## Census Privacy Protected Microdata Files (PPMF)
+
+Our scripts generate a large set of datasets from the PPMF raw source data, and the overall preprocessing pipeline may take several hours. We therefore do not include them in `preprocess_all.sh`. To obtain them, you can instead run the following scripts separately.
+````
+./scripts/ppmf/tracts.sh
+./scripts/ppmf/blocks.sh
+````
+
+Please also note that the PPMF datasets are constructed with 50-50 train-test splits. The purpose of such splits is to reproduce baseline results for the experiments found in [this work](https://arxiv.org/abs/2211.03128). There is no natural classification problem for this data, but you are free to construct your own by specifying a `target` attribute when running `run/ml_eval.py`.
