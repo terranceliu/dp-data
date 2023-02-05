@@ -16,15 +16,15 @@ python run/ppmf/get_quantiles.py
 FILE_DIR=datasets/preprocessed/ppmf/geo_sets/tract
 FILES=()
 FILES+=("${FILE_DIR}/random_${SEED}.txt")
-FILES+=(${FILE_DIR}/max.txt)
-FILES+=(${FILE_DIR}/max_factor_2.txt)
-FILES+=(${FILE_DIR}/max_factor_4.txt)
-FILES+=(${FILE_DIR}/max_factor_8.txt)
-FILES+=(${FILE_DIR}/max_factor_16.txt)
-FILES+=(${FILE_DIR}/mean.txt)
-FILES+=(${FILE_DIR}/quantile_0.25.txt)
-FILES+=(${FILE_DIR}/quantile_0.50.txt)
-FILES+=(${FILE_DIR}/quantile_0.75.txt)
+# FILES+=(${FILE_DIR}/max.txt)
+# FILES+=(${FILE_DIR}/max_factor_2.txt)
+# FILES+=(${FILE_DIR}/max_factor_4.txt)
+# FILES+=(${FILE_DIR}/max_factor_8.txt)
+# FILES+=(${FILE_DIR}/max_factor_16.txt)
+# FILES+=(${FILE_DIR}/mean.txt)
+# FILES+=(${FILE_DIR}/quantile_0.25.txt)
+# FILES+=(${FILE_DIR}/quantile_0.50.txt)
+# FILES+=(${FILE_DIR}/quantile_0.75.txt)
 
 SPLIT_SEEDS=$(seq 0 4)
 for FILE in "${FILES[@]}"; do
@@ -41,5 +41,3 @@ for FILE in "${FILES[@]}"; do
             done
         done <$FILE
 done
-
-    

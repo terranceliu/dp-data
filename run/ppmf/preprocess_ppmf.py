@@ -7,7 +7,7 @@ import pandas as pd
 from dp_data.ppmf import GeoLocation, select_ppmf_geolocation, get_census_schema_and_data
 from dp_data import DataPreprocessor, DataPreprocessingConfig
 
-def         get_preprocessor(schema):
+def get_preprocessor(schema):
     attrs_cat = schema.column_names
     mappings_cat = dict(zip(schema.column_names, schema.column_values))
     config = DataPreprocessingConfig.initialize(attrs_cat=attrs_cat,
@@ -69,5 +69,5 @@ for geoid in geoids:
     df_preprocessed = preprocessor.fit_transform(ppmf)
     domain = preprocessor.get_domain()
 
-    save_files(save_dir, preprocessor, schema, df_preprocessed, domain)
+    save_files(save_dir, schema, preprocessor, df_preprocessed, domain)
     print(f'{geoid}: {df_preprocessed.shape} {domain}')
