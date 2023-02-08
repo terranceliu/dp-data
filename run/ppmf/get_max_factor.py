@@ -24,8 +24,10 @@ def idxclosest(s, val):
 parser = argparse.ArgumentParser()
 parser.add_argument('--state_ids', nargs='+', type=str, default=STATE_IDS)
 parser.add_argument('--factors', nargs='+', type=float, default=[2, 4, 8, 16])
+parser.add_argument('--version', type=str, default='2020-05-27')
 parser.add_argument('--overwrite', action='store_true')
 args = parser.parse_args()
+assert args.version in ('2020-05-27', '2021-06-08'), "invalid PPMF version"
 
 geoids_dict = {}
 for key in ['max', 'mean'] + args.factors:
@@ -33,22 +35,22 @@ for key in ['max', 'mean'] + args.factors:
     for entity in ENTITIES:
         geoids_dict[key][entity] = []
 
+save_dir_base = f'./datasets/preprocessed/ppmf/{args.version}/geo_sets/'
 # If all the files for all seeds exist, exit.
 # Note that this doesn't check whether each file contains geoids for all states passed into the arguments
 check = True
 for entity in ENTITIES:
-    save_dir = f'./datasets/preprocessed/ppmf/geo_sets/{entity}'
+    save_dir = os.path.join(save_dir_base, entity)
     save_path = os.path.join(save_dir, f'mean.txt')
     check &= os.path.exists(save_path)
     for factor in args.factors:
-        save_dir = f'./datasets/preprocessed/ppmf/geo_sets/{entity}'
         save_path = os.path.join(save_dir, f'max_factor_{factor}.txt')
         check &= os.path.exists(save_path)
 if not args.overwrite and check:
     exit()
 
+data_dir = f'./datasets/raw/ppmf/{args.version}/state/'
 for state_id in tqdm(args.state_ids):
-    data_dir = './datasets/raw/ppmf/state/'
     data_path = os.path.join(data_dir, f'ppmf_{state_id}.csv')
     ppmf = pd.read_csv(data_path, usecols=['TABBLKST', 'TABBLKCOU', 'TABTRACTCE', 'TABBLK'])
 
@@ -67,7 +69,7 @@ for state_id in tqdm(args.state_ids):
             geoids_dict[factor][entity].append(geoid)
 
 for entity in ENTITIES:
-    save_dir = f'./datasets/preprocessed/ppmf/geo_sets/{entity}'
+    save_dir = os.path.join(save_dir_base, entity)
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 

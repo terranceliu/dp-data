@@ -5,19 +5,22 @@ from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--stateid', type=str)
-parser.add_argument('--remove_existing', action='store_true')
+parser.add_argument('--version', type=str, default='2020-05-27')
+parser.add_argument('--overwite', action='store_true')
 args = parser.parse_args()
+assert args.version in ('2020-05-27', '2021-06-08'), "invalid PPMF version"
+
 state_code = args.stateid
 
-path = './datasets/raw/ppmf/ppmf.csv'
-save_dir = './datasets/raw/ppmf/state/'
+path = f'./datasets/raw/ppmf/{args.version}/ppmf.csv'
+save_dir = f'./datasets/raw/ppmf/{args.version}/state/'
 if not os.path.exists(save_dir):
     os.makedirs(save_dir)
 save_path_base = os.path.join(save_dir, 'ppmf_{}.csv')
 save_path = save_path_base.format(state_code)
 
 if os.path.exists(save_path):
-    if args.remove_existing:
+    if args.overwite:
         os.remove(save_path)
     else:
         print(f'{args.stateid}: skipping... file exists')
