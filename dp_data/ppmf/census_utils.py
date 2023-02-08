@@ -18,7 +18,7 @@ def select_ppmf_geolocation(ppmf: pd.DataFrame, geolocation: GeoLocation):
         ppmf = ppmf[ppmf["TABBLK"] == geolocation.block]
     return ppmf
 
-def get_census_schema_and_data(ppmf, ignore_TABBLK=False) -> Tuple[DataSchema, pd.DataFrame]:
+def get_census_schema_and_data(ppmf, ignore_TABBLK=False, version='2020-05-27') -> Tuple[DataSchema, pd.DataFrame]:
     """`get_census_schema_and_data(ppmf: pd.DataFrame) -> Tuple[DataSchema, pd.DataFrame]`
     
     Given the privacy protected microdata file (stored as a pandas dataframe),
@@ -33,31 +33,36 @@ def get_census_schema_and_data(ppmf, ignore_TABBLK=False) -> Tuple[DataSchema, p
     - CENRACE must take on one of the 63 possible values of `CensusRace`
     - CENHISP must take a value in `["HLO", "Not HLO"]`
     """
-    # for col in ["TABBLKST", "TABBLKCOU", "TABTRACTCE"]:
-    #     assert np.all(
-    #         ppmf[col] == ppmf[col].iloc[0]
-    #     ), "All data must be from the same census tract"
-
+    ppmf = ppmf.copy()
 
     schema = DataSchema()
+    # block
     if not ignore_TABBLK:
         blocks = np.unique(ppmf["TABBLK"])
         schema.add_column(blocks, name="TABBLK", dtype=np.dtype("int32"))
-    schema.add_column(range(0, 116), name="QAGE", dtype=np.dtype("int32"))
-    schema.add_column(["Male", "Female"], name="QSEX")
+    # age
+    if version == '2020-05-27':
+        schema.add_column(range(0, 116), name="QAGE", dtype=np.dtype("int32"))
+    # sex
+    if version == '2020-05-27':
+        schema.add_column(["Male", "Female"], name="QSEX")
+        ppmf["QSEX"] = ppmf["QSEX"].map(lambda sex_id: "Male" if sex_id == 1 else "Female") 
+    # voting age
+    if version == '2021-06-08':
+        schema.add_column(["<18", ">=18"], name="VOTING_AGE")
+        ppmf["VOTING_AGE"] = ppmf["VOTING_AGE"].map(lambda vote_id: "<18" if vote_id == 1 else ">=18") 
+    # race
     schema.add_column(range(1, 64), name="CENRACE", dtype=np.dtype("int32"))
+    # hispanic id
     schema.add_column(["HLO", "Not HLO"], name="CENHISP")
-
-    data = ppmf.loc[:, ["TABBLK", "QAGE", "QSEX", "CENRACE", "CENHISP"]]
-
-    # Convert sex id into a more user-friendly string
-    data["QSEX"] = ppmf["QSEX"].map(lambda sex_id: "Male" if sex_id == 1 else "Female")
-    # Convert the hispanic id into either "HLO" or "Not HLO"
-    data["CENHISP"] = ppmf["CENHISP"].map(
+    ppmf["CENHISP"] = ppmf["CENHISP"].map(
         lambda hisp_id: "Not HLO" if hisp_id == 1 else "HLO"
     )
 
-    return schema, data
+    ppmf = ppmf.loc[:, schema.column_names]
+    # data = ppmf.loc[:, ["TABBLK", "QAGE", "QSEX", "CENRACE", "CENHISP"]]
+
+    return schema, ppmf
 
 def build_census_queries(schema: DataSchema, use_tract_queries=True, use_PCT12AN=False):
     queries = []

@@ -33,7 +33,9 @@ def save_files(save_dir, schema, preprocessor, df_preprocessed, domain):
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--geoid', type=str, default=None, help='tract code')
+parser.add_argument('--version', type=str, default='2020-05-27')
 args = parser.parse_args()
+assert args.version in ('2020-05-27', '2021-06-08'), "invalid PPMF version"
 
 geoids = []
 for i in [2, 5, 11, 15]: # state, county, tract, block
@@ -43,9 +45,9 @@ for i in [2, 5, 11, 15]: # state, county, tract, block
 
 # organize files by state
 state_id = geoids[0]
-base_dir = f'./datasets/preprocessed/ppmf/{state_id}'
+base_dir = f'./datasets/preprocessed/ppmf/{args.version}/{state_id}'
 
-data_dir = './datasets/raw/ppmf/state/'
+data_dir = f'./datasets/raw/ppmf/{args.version}/state/'
 data_path = os.path.join(data_dir, f'ppmf_{state_id}.csv')
 ppmf_orig = pd.read_csv(data_path)
 
@@ -64,7 +66,7 @@ for geoid in geoids:
         
     geolocation = GeoLocation.parse_geoid(geoid)
     ppmf = select_ppmf_geolocation(ppmf_orig, geolocation)
-    schema, ppmf = get_census_schema_and_data(ppmf, ignore_TABBLK=geolocation.type()=='block')
+    schema, ppmf = get_census_schema_and_data(ppmf, ignore_TABBLK=geolocation.type()=='block', version=args.version)
     preprocessor = get_preprocessor(schema)
     df_preprocessed = preprocessor.fit_transform(ppmf)
     domain = preprocessor.get_domain()
