@@ -41,7 +41,6 @@ def get_train_test(domain, df_train, df_test, target):
 
 def get_args():
    parser = argparse.ArgumentParser()
-   parser = argparse.ArgumentParser()
    parser.add_argument('--dataset', type=str)
    parser.add_argument('--target', type=str, default=None)
    parser.add_argument('--train_test_split_dir', type=str)
