@@ -14,8 +14,16 @@ class Domain:
         self.attrs = tuple(attrs)
         self.shape = tuple(shape)
         self.config = dict(zip(attrs, shape))
+
         self.attrs_cat = tuple([attr for attr in self.attrs if self[attr] != 1])
         self.attrs_num = tuple([attr for attr in self.attrs if self[attr] == 1])
+
+        self.attr2idx = {attr: i  for i, attr in enumerate(self.attrs)}
+        self.attr2pos = {}
+        cur = 0
+        for col, sz in self.config.items():
+            self.attr2pos[col] = list(range(cur, cur + sz))
+            cur += sz
 
     @staticmethod
     def fromdict(config):
