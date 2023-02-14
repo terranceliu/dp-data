@@ -34,7 +34,8 @@ preprocessor = DataPreprocessor(config)
 preprocessor.fit(df)
 
 domain = preprocessor.get_domain()
-domain[attrs_dict['target']] = domain.pop(attrs_dict['target'])
+if 'target' in attrs_dict.keys():
+    domain[attrs_dict['target']] = domain.pop(attrs_dict['target'])
 
 df_preprocessed = preprocessor.transform(df)
 
