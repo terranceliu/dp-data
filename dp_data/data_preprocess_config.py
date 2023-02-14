@@ -44,7 +44,11 @@ def get_config_from_json(attrs_dict):
     mappings_cat, mappings_num, mappings_num_discretized = None, None, None
 
     attrs_cat = attrs_dict['categorical']
+    if 'cat_mapping' in attrs_dict.keys():
+        mappings_cat = attrs_dict['cat_mapping']
     attrs_num = attrs_dict['numerical']
+    if 'num_mapping' in attrs_dict.keys():
+        mappings_num = attrs_dict['num_mapping']
 
     config = DataPreprocessingConfig.initialize(attrs_cat=attrs_cat, 
                                                 attrs_num=attrs_num, 
