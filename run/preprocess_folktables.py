@@ -44,6 +44,73 @@ ACSReal = BasicProblem(
     postprocess=lambda x: np.nan_to_num(x, -1),
 )
 
+
+def multitask_filter(data):
+    """
+    Apply filer and binarize the target features: JWMNP PINCP.
+    :param data:
+    :return:
+    """
+    df = data
+    df = df[df['PWGTP'] >= 1]
+    df = df[df['AGEP'] > 16]
+    df = df[df['AGEP'] < 90]
+    df['PUBCOV'] = (df['PUBCOV'] == 1).astype(int)
+    df['ESR'] = (df['ESR'] == 1).astype(int)
+    df['JWMNP'] = (df['JWMNP'] > 20).astype(int)
+    df['MIG'] = (df['MIG'] == 1).astype(int)
+    # df['PINCP'] = (df['PINCP'] > 50000).astype(int)
+    return df
+
+ACSmultitask = BasicProblem(
+    features=[
+
+        # categorical features
+        'COW', # Class of worker
+        'SCHL', # Educational attainment
+        'MAR', # Marital status
+        'RELP',
+        'SEX', #  Male or Female
+        'RAC1P', # Race
+        'WAOB', # World area of birth
+        'FOCCP', # Occupation
+        'DIS', # Disability
+        'ESP', # Employment status of parents
+        'CIT', # Citizenship status
+        'JWTR', # Means of transportation to work
+        'MIL', # Served September 2001 or later
+        'ANC', # Ancestry
+        'NATIVITY', # Nativity
+        'DEAR', # Hearing difficulty
+        'DEYE', # Vision difficulty
+        'DREM', # Cognitive difficulty
+        'GCL', # Grandparents living with grandchildren
+        'FER', # Gave birth to child within the past 12 months
+
+        # numerical features
+        'WKHP', # Usual hours worked per week past 12 months
+        'AGEP', # AGE
+        'INTP', # Interest, dividends, and net rental income past 12 months
+        'JWRIP', # Vehicle occupancy
+        'SEMP', # Self-employment income past 12 months
+        'WAGP', # Wages or salary income past 12 months
+        'POVPIP', # Income-to-poverty ratio recode
+        # 'JWMNP', # Travel time to work
+
+        # target variables
+        'JWMNP', # Travel time to work. Is it greater than 20?
+        # 'PINCP', # Total person's income. Is it greater than 50K?
+        'ESR', # Employment status recode
+        'MIG', # Mobility status (lived here 1 year ago)
+        'PUBCOV', # Public health coverage
+    ],
+    target='PINCP',
+    target_transform=lambda x: x > 50000,
+    group='RAC1P',
+    preprocess=multitask_filter,
+    postprocess=lambda x: np.nan_to_num(x, -1),
+)
+
 ##### Data info #####
 RAW_DATA_DIR = './datasets/raw/folktables'
 
@@ -69,7 +136,8 @@ ACSTask = {
     'mobility': ACSMobility,
     'employment': ACSEmployment,
     'travel': ACSTravelTime,
-    'real': ACSReal
+    'real': ACSReal,
+    'multitask': ACSmultitask
 }
 
 # get list of catgorical and numerical attributes
