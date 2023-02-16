@@ -27,5 +27,7 @@ for seed in args.seeds:
     df = get_dataset(args.dataset, root_path=args.data_dir_root).df
     idxs_train, idxs_test = split_data(df, frac=args.frac, seed=seed)
 
+    print('Saving ', os.path.join(data_dir, 'train.npy'))
     np.save(os.path.join(data_dir, 'train.npy'), idxs_train)
+    print('Saving ', os.path.join(data_dir, 'test.npy'))
     np.save(os.path.join(data_dir, 'test.npy'), idxs_test)
