@@ -4,7 +4,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC, LinearSVC
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, AdaBoostClassifier
 from xgboost import XGBClassifier
-from lightgbm import LGBMClassifier
+# from lightgbm import LGBMClassifier
 
 MODELS = {
    'DecisionTree': DecisionTreeClassifier(class_weight='balanced'), 
@@ -15,7 +15,7 @@ MODELS = {
    'AdaBoost': AdaBoostClassifier(),
    'GradientBoosting': GradientBoostingClassifier(),
    'XGBoost': XGBClassifier(),
-   'LightGBM': LGBMClassifier(),
+   # 'LightGBM': LGBMClassifier(),
 }
 MODEL_PARAMS = {
    'DecisionTree': {},
@@ -27,5 +27,5 @@ MODEL_PARAMS = {
    'GradientBoosting': {},
    'AdaBoost': {},
    'XGBoost': {},
-   'LightGBM': {},
+   # 'LightGBM': {},
 }

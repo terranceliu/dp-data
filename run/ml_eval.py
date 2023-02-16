@@ -52,55 +52,85 @@ def get_args():
    parser.add_argument('--num_folds', type=int, default=5)
    return parser.parse_args()
 
-args = get_args()
 
-data_train = get_dataset(args.dataset, root_path=args.data_dir_root, 
-                         idxs_path=f'{args.train_test_split_dir}/train', ignore_numerical=args.ignore_numerical)
-data_test = get_dataset(args.dataset, root_path=args.data_dir_root, 
-                        idxs_path=f'{args.train_test_split_dir}/test', ignore_numerical=args.ignore_numerical)
+def evaluate_ml(
+             train_df,
+             test_df,
+             target,
+             models,
+             seed: int=0,
+             grid_search: bool=False):
+    # data_train = get_dataset(dataset, root_path=data_dir_root, idxs_path=f'{train_test_split_dir}/train', ignore_numerical=args.ignore_numerical)
+    # data_test = get_dataset(dataset, root_path=data_dir_root,
+    #                         idxs_path=f'{train_test_split_dir}/test', ignore_numerical=ignore_numerical)
 
-domain = data_train.domain
-target = domain.attrs[-1] if args.target is None else args.target
+    # domain = data_train.domain
+    # target = domain.attrs[-1] if target is None else target
 
-f1_scoring = 'f1' if domain[target] == 2 else 'f1_macro'
+    f1_scoring = 'f1' if domain[target] == 2 else 'f1_macro'
 
-scorers = {}
-if f1_scoring == 'f1':
-   scorers[f1_scoring] = make_scorer(f1_score)
-else:
-   scorers[f1_scoring] = make_scorer(f1_score, average='macro')
-scorers['roc'] = make_scorer(roc_auc_score)
-scorers['prc'] = make_scorer(average_precision_score)
-scorers['accuracy'] = make_scorer(accuracy_score)
+    scorers = {}
+    if f1_scoring == 'f1':
+       scorers[f1_scoring] = make_scorer(f1_score)
+    else:
+       scorers[f1_scoring] = make_scorer(f1_score, average='macro')
+    scorers['roc'] = make_scorer(roc_auc_score)
+    scorers['prc'] = make_scorer(average_precision_score)
+    scorers['accuracy'] = make_scorer(accuracy_score)
 
-X_train, y_train, X_test, y_test = get_train_test(domain, data_train.df, data_test.df, target)
+    X_train, y_train, X_test, y_test = get_train_test(domain, train_df, test_df, target)
 
-mode = st.mode(y_train, keepdims=True).mode[0]
-test_acc_maj = (y_test == mode).mean()
-print(f'Majority accuracy: {test_acc_maj}')
+    mode = st.mode(y_train, keepdims=True).mode[0]
+    test_acc_maj = (y_test == mode).mean()
+    print(f'Majority accuracy: {test_acc_maj}')
 
-models = MODELS.keys() if args.models is None else args.models
-for model_name in models:
-   model = MODELS[model_name]
-   model.random_state = args.seed
+    models = MODELS.keys() if models is None else models
+    for model_name in models:
+       model = MODELS[model_name]
+       model.random_state = seed
 
-   import time
-   start_time = time.time()
+       import time
+       start_time = time.time()
 
-   if args.grid_search:
-      params = MODEL_PARAMS[model_name]
-      gridsearch = GridSearchCV(model, param_grid=params, cv=args.num_folds, scoring=f1_scoring, verbose=1)
-      gridsearch.fit(X_train, y_train)
-      model = gridsearch.best_estimator_
-      print(f'Best parameters: {gridsearch.best_params_}')
-   else:
-      model.fit(X_train, y_train)
+       if grid_search:
+          params = MODEL_PARAMS[model_name]
+          gridsearch = GridSearchCV(model, param_grid=params, cv=args.num_folds, scoring=f1_scoring, verbose=1)
+          gridsearch.fit(X_train, y_train)
+          model = gridsearch.best_estimator_
+          print(f'Best parameters: {gridsearch.best_params_}')
+       else:
+          model.fit(X_train, y_train)
 
-   print(f'Test metrics ({model_name}):')
-   for metric_name, scorer in scorers.items():
-       metric_train = scorer(model, X_train, y_train)
-       metric_test = scorer(model, X_test, y_test)
-       print(f'{metric_name}: {metric_test}')
+       print(f'Test metrics ({model_name}):')
+       for metric_name, scorer in scorers.items():
+           metric_train = scorer(model, X_train, y_train)
+           metric_test = scorer(model, X_test, y_test)
+           print(f'{metric_name}: {metric_test}')
 
-   end_time = time.time()
-   print(f'Total time (s): {end_time - start_time}')
+       end_time = time.time()
+       print(f'Total time (s): {end_time - start_time}')
+
+
+
+
+if __name__ == "__main__":
+    args = get_args()
+
+
+    data_train = get_dataset(args.dataset, root_path=args.data_dir_root, idxs_path=f'{args.train_test_split_dir}/train',
+                             ignore_numerical=args.ignore_numerical)
+    data_test = get_dataset(args.dataset, root_path=args.data_dir_root,
+                            idxs_path=f'{args.train_test_split_dir}/test', ignore_numerical=args.ignore_numerical)
+
+
+    domain = data_train.domain
+    target = domain.attrs[-1] if args.target is None else args.target
+
+    evaluate(
+        train_df=data_train.df,
+        test_df=data_test.df,
+        target=args.target,
+        models=args.models,
+        seed=args.seed,
+        grid_search=args.grid_search
+    )
