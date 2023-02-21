@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from scipy import stats as st
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer, f1_score, roc_auc_score, average_precision_score, accuracy_score
 from typing import Tuple, Callable
@@ -17,76 +17,78 @@ def separate_cat_and_num_cols(domain, features):
     train_cols_cat = [c for c in features if c not in train_cols_num]
     return train_cols_num, train_cols_cat
 
-def get_Xy(domain: Domain, features: list, target, df: pd.DataFrame):
-    train_cols_num, train_cols_cat = separate_cat_and_num_cols(domain, features)
-    y = df[target].values
-    X = None
-    if len(train_cols_num) > 0:
-        X = df[train_cols_num].values
+def get_Xy(domain: Domain, features: list, target, df_train: pd.DataFrame, df_test: pd.DataFrame):
+    cols_num, cols_cat = separate_cat_and_num_cols(domain, features)
+    y_train = df_train[target].values
+    y_test = df_test[target].values
+    X_train = None
+    X_test = None
 
-    if len(train_cols_cat) > 0:
-        X_cat = df[train_cols_cat].values
-        categories = [np.arange(domain[c]) for c in train_cols_cat]
+    if len(cols_cat) > 0:
+        X_cat_train = df_train[cols_cat].values
+        X_cat_test = df_test[cols_cat].values
+        categories = [np.arange(domain[c]) for c in cols_cat]
         enc = OneHotEncoder(categories=categories)
-        enc.fit(X_cat)
-        X_cat = enc.transform(X_cat).toarray()
+        enc.fit(X_cat_train)
+        X_cat_train = enc.transform(X_cat_train).toarray()
+        X_cat_test = enc.transform(X_cat_test).toarray()
+        X_train = X_cat_train
+        X_test = X_cat_test
 
-        if X is not None:
-            X = np.concatenate((X, X_cat), axis=1)
+    if len(cols_num) > 0:
+        X_num_train = df_train[cols_num].values
+        X_num_test = df_test[cols_num].values
+        scaler = StandardScaler()
+        scaler.fit(X_num_train)
+        X_num_train = scaler.transform(X_num_train)
+        X_num_test = scaler.transform(X_num_test)
+
+        if X_train is not None:
+            X_train = np.concatenate((X_train, X_num_train), axis=1)
+            X_test = np.concatenate((X_test, X_num_test), axis=1)
         else:
-            X = X_cat
+            X_train = X_num_train
+            X_test = X_num_test
 
-    assert X is not None
-    return X, y
+    assert X_train is not None
+    assert X_test is not None
+    return X_train, y_train, X_test, y_test
 
 
 
 def get_evaluate_ml(
-        # train_df,
-        # test_df,
         df_test,
         config,
-        # dataset,
-        # data_dir_root,
-        # train_test_split_dir,
-        # ignore_numerical: bool,
         targets: list,
         models: list,
         grid_search: bool = False,
-        verbose: bool=False) -> Callable:
+        ) -> Callable:
     domain = Domain.fromdict(config)
-    # data_train = get_dataset(dataset, root_path=data_dir_root, idxs_path=f'{train_test_split_dir}/train', ignore_numerical=args.ignore_numerical)
-    # data_test = get_dataset(dataset, root_path=data_dir_root,
-    #                         idxs_path=f'{train_test_split_dir}/test', ignore_numerical=ignore_numerical)
-    # domain = data_train.domain
-    # target = domain.attrs[-1] if target is None else target
-
-    # targets = ['JWMNP', 'PINCP', 'ESR', 'MIG', 'PUBCOV']
     features = []
     for f in domain.attrs:
         if f not in targets:
             features.append(f)
 
-
-
     models = MODELS.keys() if models is None else models
 
-    def eval_fn(df_train, seed):
+    def eval_fn(df_train, seed, verbose: bool=False):
 
         res = []
         for target in targets:
-            f1_scoring = 'f1' if domain[target] == 2 else 'f1_macro'
+            if domain.size([target]) > 2: continue
+            # f1_scoring = 'f1' if domain[target] == 2 else 'f1_macro'
+            f1_scoring = 'f1_macro'
             scorers = {}
             if f1_scoring == 'f1':
                 scorers[f1_scoring] = make_scorer(f1_score)
             else:
                 scorers[f1_scoring] = make_scorer(f1_score, average='macro')
-            scorers['roc'] = make_scorer(roc_auc_score)
-            scorers['prc'] = make_scorer(average_precision_score)
+            # scorers['roc'] = make_scorer(roc_auc_score)
+            # scorers['prc'] = make_scorer(average_precision_score)
             scorers['accuracy'] = make_scorer(accuracy_score)
 
-            X_train, y_train = get_Xy(domain, features=features, target=target, df=df_train)
-            X_test, y_test = get_Xy(domain, features=features, target=target, df=df_test)
+            X_train, y_train, X_test, y_test = get_Xy(domain, features=features, target=target, df_train=df_train, df_test=df_test)
+            # X_test, y_test = get_Xy(domain, features=features, target=target, df_train=df_test)
 
             if verbose: print(f'Target: {target}:')
             mode = st.mode(y_train).mode[0]
@@ -102,7 +104,7 @@ def get_evaluate_ml(
 
                 if grid_search:
                     params = MODEL_PARAMS[model_name]
-                    gridsearch = GridSearchCV(model, param_grid=params, cv=args.num_folds, scoring=f1_scoring, verbose=1)
+                    gridsearch = GridSearchCV(model, param_grid=params, cv=5, scoring=f1_scoring, verbose=1)
                     gridsearch.fit(X_train, y_train)
                     model = gridsearch.best_estimator_
                     if verbose: print(f'Best parameters: {gridsearch.best_params_}')

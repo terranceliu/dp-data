@@ -55,10 +55,14 @@ def multitask_filter(data):
     df = df[df['PWGTP'] >= 1]
     df = df[df['AGEP'] > 16]
     df = df[df['AGEP'] < 90]
+
     df['PUBCOV'] = (df['PUBCOV'] == 1).astype(int)
     df['ESR'] = (df['ESR'] == 1).astype(int)
     df['JWMNP'] = (df['JWMNP'] > 20).astype(int)
     df['MIG'] = (df['MIG'] == 1).astype(int)
+
+    df : pd.DataFrame
+    df = df.rename(columns={'JWMNP': 'JWMNP_bin'})
     # df['PINCP'] = (df['PINCP'] > 50000).astype(int)
     return df
 
@@ -110,6 +114,22 @@ ACSmultitask = BasicProblem(
     preprocess=multitask_filter,
     postprocess=lambda x: np.nan_to_num(x, -1),
 )
+ACSmultitask.features.remove('JWMNP')
+ACSmultitask.features.append('JWMNP_bin')
+
+print(ACSmultitask.features)
+class MultiTaskProblem(BasicProblem):
+    def __init__(self,
+                 num_features,
+                 cat_features,
+                 ):
+        self._features = features
+        self._target = target
+
+    def df_to_numpy(self, df):
+        df = self._preprocess(df)
+
+
 
 ##### Data info #####
 RAW_DATA_DIR = './datasets/raw/folktables'
