@@ -117,18 +117,6 @@ ACSmultitask = BasicProblem(
 ACSmultitask.features.remove('JWMNP')
 ACSmultitask.features.append('JWMNP_bin')
 
-print(ACSmultitask.features)
-class MultiTaskProblem(BasicProblem):
-    def __init__(self,
-                 num_features,
-                 cat_features,
-                 ):
-        self._features = features
-        self._target = target
-
-    def df_to_numpy(self, df):
-        df = self._preprocess(df)
-
 
 
 ##### Data info #####
@@ -169,7 +157,16 @@ def split_cat_num(attrs, target_attr=None):
     attrs_num = set(attrs).intersection(all_attrs_num)
     return list(attrs_cat), list(attrs_num)
 
-def get_acs_raw(task, state, year='2018', horizon='1-Year', remove_raw_files=False, return_attrs=False):
+def filter_outliers(df, numeric_cols):
+    print('Removing outliers')
+    df_temp = df.copy(deep=True)
+    for num_col in numeric_cols:
+        q_lo = df_temp[num_col].quantile(0.01)
+        q_hi = df_temp[num_col].quantile(0.95)
+        df = df[(df[num_col] <= q_hi) & (df[num_col] >= q_lo)]
+    return df
+def get_acs_raw(task, state, year='2018', horizon='1-Year', remove_raw_files=False, return_attrs=False,
+                remove_outliers=False):
     data_source = ACSDataSource(survey_year=year, horizon=horizon, survey='person',
                                 root_dir=RAW_DATA_DIR)
     acs_data = data_source.get_data(states=[state], download=True)
@@ -185,15 +182,19 @@ def get_acs_raw(task, state, year='2018', horizon='1-Year', remove_raw_files=Fal
     if remove_raw_files:
         shutil.rmtree(data_source._root_dir)
 
+    attr_cat, attr_num = split_cat_num(all_attrs, target_attr=target_attr)
+    if remove_outliers:
+        print('Removing outliers`')
+        df = filter_outliers(df, attr_num)
+
     if return_attrs:
-        attr_cat, attr_num = split_cat_num(all_attrs, target_attr=target_attr)
         return df, ACSTask[task].target, (attr_cat, attr_num)
     return df, ACSTask[task].target
 
-def get_preprocessor_mappings(task):
+def get_preprocessor_mappings(task, remove_outliers=False):
     dict_cat, dict_num = {}, {}
     for state in tqdm(ALL_STATES):
-        df, _, (attr_cat, attr_num) = get_acs_raw(task, state, return_attrs=True)
+        df, _, (attr_cat, attr_num) = get_acs_raw(task, state, return_attrs=True, remove_outliers=remove_outliers)
 
         for attr in attr_cat:
             unique_attrs = set(df[attr].unique().astype(int))
@@ -218,8 +219,9 @@ def get_preprocessor_mappings(task):
 
     return dict_cat, dict_num
 
-def preprocess_acs(task, state, year='2018', horizon='1-Year'):
-    df, target = get_acs_raw(task, state)
+
+def preprocess_acs(task, state, year='2018', horizon='1-Year', remove_outliers=False):
+    df, target = get_acs_raw(task, state, remove_outliers=remove_outliers)
     
     mappings_dir = os.path.join(RAW_DATA_DIR, year, horizon, 'preprocessor_mappings')
     if not os.path.exists(mappings_dir):
@@ -229,13 +231,14 @@ def preprocess_acs(task, state, year='2018', horizon='1-Year'):
         with open(mappings_path, 'rb') as handle:
             dict_cat, dict_num = pickle.load(handle)
     else:
-        dict_cat, dict_num = get_preprocessor_mappings(task)
+        dict_cat, dict_num = get_preprocessor_mappings(task, remove_outliers=remove_outliers)
         with open(mappings_path, 'wb') as handle:
             pickle.dump((dict_cat, dict_num), handle)
 
     for attr in COLS_DEL:
         dict_cat.pop(attr, None)
         dict_num.pop(attr, None)
+
     # use state instead of national values to create mappings
     for attr in COLS_STATE_SPECIFIC:
         if attr in dict_cat.keys():
@@ -268,16 +271,21 @@ def get_args():
     parser.add_argument('--year', type=str, default='2018')
     parser.add_argument('--horizon', type=str, default='1-Year')
     parser.add_argument('--keep_raw', action='store_true')
+    parser.add_argument('--remove_outliers', action='store_true')
     return parser.parse_args()
 
 if __name__ == '__main__':
     args = get_args()
 
+    print(args)
     for task, state in itertools.product(args.tasks, args.states):
         print(task, state)
-        df_preprocessed, domain, preprocessor = preprocess_acs(task, state, year=args.year, horizon=args.horizon)
+        df_preprocessed, domain, preprocessor = preprocess_acs(task, state, year=args.year, horizon=args.horizon,
+                                                               remove_outliers=args.remove_outliers)
 
         data_dir = f'./datasets/preprocessed/folktables/{args.horizon}/folktables_{args.year}_{task}_{state}'
+        if args.remove_outliers:
+            data_dir = data_dir + '_outliers'
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
 
