@@ -17,7 +17,8 @@ def separate_cat_and_num_cols(domain, features):
     train_cols_cat = [c for c in features if c not in train_cols_num]
     return train_cols_num, train_cols_cat
 
-def get_Xy(domain: Domain, features: list, target, df_train: pd.DataFrame, df_test: pd.DataFrame):
+def get_Xy(domain: Domain, features: list, target, df_train: pd.DataFrame, df_test: pd.DataFrame,
+           scale_real_valued=True):
     cols_num, cols_cat = separate_cat_and_num_cols(domain, features)
     y_train = df_train[target].values
     y_test = df_test[target].values
@@ -38,10 +39,11 @@ def get_Xy(domain: Domain, features: list, target, df_train: pd.DataFrame, df_te
     if len(cols_num) > 0:
         X_num_train = df_train[cols_num].values
         X_num_test = df_test[cols_num].values
-        scaler = StandardScaler()
-        scaler.fit(X_num_train)
-        X_num_train = scaler.transform(X_num_train)
-        X_num_test = scaler.transform(X_num_test)
+        if scale_real_valued:
+            scaler = StandardScaler()
+            scaler.fit(X_num_train)
+            X_num_train = scaler.transform(X_num_train)
+            X_num_test = scaler.transform(X_num_test)
 
         if X_train is not None:
             X_train = np.concatenate((X_train, X_num_train), axis=1)
@@ -62,6 +64,7 @@ def get_evaluate_ml(
         targets: list,
         models: list,
         grid_search: bool = False,
+        rescale=True
         ) -> Callable:
     domain = Domain.fromdict(config)
     features = []
@@ -87,7 +90,8 @@ def get_evaluate_ml(
             # scorers['prc'] = make_scorer(average_precision_score)
             scorers['accuracy'] = make_scorer(accuracy_score)
 
-            X_train, y_train, X_test, y_test = get_Xy(domain, features=features, target=target, df_train=df_train, df_test=df_test)
+            X_train, y_train, X_test, y_test = get_Xy(domain, features=features, target=target, df_train=df_train, df_test=df_test,
+                                                      scale_real_valued=rescale)
             # X_test, y_test = get_Xy(domain, features=features, target=target, df_train=df_test)
 
             if verbose: print(f'Target: {target}:')
