@@ -1,7 +1,8 @@
 import argparse
 import numpy as np
+import pandas as pd
 from scipy import stats as st
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer, f1_score, roc_auc_score, average_precision_score, accuracy_score
 
@@ -14,15 +15,12 @@ def get_train_cols(domain) :
    train_cols_cat = [c for c in train_cols if c not in train_cols_num]
    return train_cols, train_cols_num, train_cols_cat
 
-
-def get_train_test(domain, df_train, df_test, target):
+def get_train_test(domain, df_train, df_test, target, normalize_X=True):
    _, train_cols_num, train_cols_cat = get_train_cols(domain)
    y_train, y_test = df_train[target].values, df_test[target].values
 
-
    X_train, X_test = df_train[train_cols_num].values, df_test[train_cols_num].values
    X_train_cat, X_test_cat = df_train[train_cols_cat].values, df_test[train_cols_cat].values
-
 
    if len(train_cols_cat) > 0:
        categories = [np.arange(domain[c]) for c in train_cols_cat]
@@ -35,102 +33,112 @@ def get_train_test(domain, df_train, df_test, target):
        X_train = np.concatenate((X_train, X_train_cat), axis=1)
        X_test = np.concatenate((X_test, X_test_cat), axis=1)
 
+   if normalize_X:
+      enc = StandardScaler()
+      X_train = enc.fit_transform(X_train)
+      X_test = enc.transform(X_test)
 
    return X_train, y_train, X_test, y_test
 
+def get_maj_acc(y_train, y_test):
+   mode = st.mode(y_train, keepdims=True).mode[0]
+   test_acc_maj = (y_test == mode).mean()
+   return test_acc_maj
+
+def get_scorers(f1_type='f1'):
+   scorers = {}
+   if f1_type == 'f1':
+      scorers[f1_type] = make_scorer(f1_score)
+   else:
+      scorers[f1_type] = make_scorer(f1_score, average='macro')
+   scorers['roc'] = make_scorer(roc_auc_score)
+   scorers['prc'] = make_scorer(average_precision_score)
+   scorers['accuracy'] = make_scorer(accuracy_score)
+   return scorers
+
+def evaluate(df_train,
+             df_test,
+             target,
+             models,
+             seed: int=0,
+             grid_search: bool=False):
+   f1_scoring = 'f1' if domain[target] == 2 else 'f1_macro'
+   scorers = get_scorers(f1_type=f1_scoring)
+
+   X_train, y_train, X_test, y_test = get_train_test(domain, 
+                                                     df_train, 
+                                                     df_test, 
+                                                     target, 
+                                                     normalize_X=True)
+
+   models = MODELS.keys() if models is None else models
+   for model_name in models:
+      model = MODELS[model_name]
+      model.random_state = seed
+
+      import time
+      start_time = time.time()
+
+      if grid_search:
+         params = MODEL_PARAMS[model_name]
+         gridsearch = GridSearchCV(model, 
+                                   param_grid=params, 
+                                   cv=args.num_folds, 
+                                   scoring=f1_scoring, 
+                                   verbose=1)
+         gridsearch.fit(X_train, y_train)
+         model = gridsearch.best_estimator_
+         print(f'Best parameters: {gridsearch.best_params_}')
+      else:
+         model.fit(X_train, y_train)
+      end_time = time.time()
+      runtime = end_time - start_time
+
+      results = {'model': model_name, 'runtime': runtime}
+      for metric_name, scorer in scorers.items():
+         metric_test = scorer(model, X_test, y_test)
+         results[metric_name] = metric_test
+
+      print(results)
 
 def get_args():
    parser = argparse.ArgumentParser()
    parser.add_argument('--dataset', type=str)
+   parser.add_argument('--train_path', type=str, default=None)
    parser.add_argument('--target', type=str, default=None)
-   parser.add_argument('--train_test_split_dir', type=str)
+   parser.add_argument('--train_test_split_dir', type=str, default='seed0')
    parser.add_argument('--data_dir_root', type=str, default='./datasets/preprocessed')
-   parser.add_argument('--ignore_numerical', action='store_true')
    parser.add_argument('--models', nargs='+', type=str, default=None)
    parser.add_argument('--seed', type=int, default=0)
    parser.add_argument('--grid_search', action='store_true')
    parser.add_argument('--num_folds', type=int, default=5)
    return parser.parse_args()
 
-
-def evaluate_ml(
-             train_df,
-             test_df,
-             target,
-             models,
-             seed: int=0,
-             grid_search: bool=False):
-    # data_train = get_dataset(dataset, root_path=data_dir_root, idxs_path=f'{train_test_split_dir}/train', ignore_numerical=args.ignore_numerical)
-    # data_test = get_dataset(dataset, root_path=data_dir_root,
-    #                         idxs_path=f'{train_test_split_dir}/test', ignore_numerical=ignore_numerical)
-
-    # domain = data_train.domain
-    # target = domain.attrs[-1] if target is None else target
-
-    f1_scoring = 'f1' if domain[target] == 2 else 'f1_macro'
-
-    scorers = {}
-    if f1_scoring == 'f1':
-       scorers[f1_scoring] = make_scorer(f1_score)
-    else:
-       scorers[f1_scoring] = make_scorer(f1_score, average='macro')
-    scorers['roc'] = make_scorer(roc_auc_score)
-    scorers['prc'] = make_scorer(average_precision_score)
-    scorers['accuracy'] = make_scorer(accuracy_score)
-
-    X_train, y_train, X_test, y_test = get_train_test(domain, train_df, test_df, target)
-
-    mode = st.mode(y_train, keepdims=True).mode[0]
-    test_acc_maj = (y_test == mode).mean()
-    print(f'Majority accuracy: {test_acc_maj}')
-
-    models = MODELS.keys() if models is None else models
-    for model_name in models:
-       model = MODELS[model_name]
-       model.random_state = seed
-
-       import time
-       start_time = time.time()
-
-       if grid_search:
-          params = MODEL_PARAMS[model_name]
-          gridsearch = GridSearchCV(model, param_grid=params, cv=args.num_folds, scoring=f1_scoring, verbose=1)
-          gridsearch.fit(X_train, y_train)
-          model = gridsearch.best_estimator_
-          print(f'Best parameters: {gridsearch.best_params_}')
-       else:
-          model.fit(X_train, y_train)
-
-       print(f'Test metrics ({model_name}):')
-       for metric_name, scorer in scorers.items():
-           metric_train = scorer(model, X_train, y_train)
-           metric_test = scorer(model, X_test, y_test)
-           print(f'{metric_name}: {metric_test}')
-
-       end_time = time.time()
-       print(f'Total time (s): {end_time - start_time}')
-
-
-
-
 if __name__ == "__main__":
-    args = get_args()
+   args = get_args()
 
+   # get test set
+   data_test = get_dataset(args.dataset, 
+                           root_path=args.data_dir_root,
+                           idxs_path=f'{args.train_test_split_dir}/test')
+   df_test = data_test.df
+   domain = data_test.domain
+   target = domain.attrs[-1] if args.target is None else args.target
 
-    data_train = get_dataset(args.dataset, root_path=args.data_dir_root, idxs_path=f'{args.train_test_split_dir}/train',
-                             ignore_numerical=args.ignore_numerical)
-    data_test = get_dataset(args.dataset, root_path=args.data_dir_root,
-                            idxs_path=f'{args.train_test_split_dir}/test', ignore_numerical=args.ignore_numerical)
+   # get train set
+   if args.train_path is not None:
+      df_train = pd.read_csv(args.train_path)
+   else:
+      df_train = get_dataset(args.dataset, 
+                             root_path=args.data_dir_root,
+                             idxs_path=f'{args.train_test_split_dir}/test'
+                             ).df
 
-
-    domain = data_train.domain
-    target = domain.attrs[-1] if args.target is None else args.target
-
-    evaluate(
-        train_df=data_train.df,
-        test_df=data_test.df,
-        target=args.target,
-        models=args.models,
-        seed=args.seed,
-        grid_search=args.grid_search
-    )
+   evaluate(
+      df_train=df_train,
+      df_test=df_test,
+      target=args.target,
+      models=args.models,
+      seed=args.seed,
+      grid_search=args.grid_search
+      )
