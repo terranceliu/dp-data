@@ -60,20 +60,19 @@ def multitask_filter(data):
     df['ESR'] = (df['ESR'] == 1).astype(int)
     df['JWMNP'] = (df['JWMNP'] > 20).astype(int)
     df['MIG'] = (df['MIG'] == 1).astype(int)
+    df['PINCP'] = (df['PINCP'] > 50000).astype(int)
 
     df : pd.DataFrame
     df = df.rename(columns={'JWMNP': 'JWMNP_bin'})
-    # df['PINCP'] = (df['PINCP'] > 50000).astype(int)
     return df
 
-ACSmultitask = BasicProblem(
+ACSMultitask = BasicProblem(
     features=[
-
         # categorical features
         'COW', # Class of worker
         'SCHL', # Educational attainment
         'MAR', # Marital status
-        'RELP',
+        'RELP', # Relationship (to reference person)
         'SEX', #  Male or Female
         'RAC1P', # Race
         'WAOB', # World area of birth
@@ -90,7 +89,6 @@ ACSmultitask = BasicProblem(
         'DREM', # Cognitive difficulty
         'GCL', # Grandparents living with grandchildren
         'FER', # Gave birth to child within the past 12 months
-
         # numerical features
         'WKHP', # Usual hours worked per week past 12 months
         'AGEP', # AGE
@@ -99,24 +97,23 @@ ACSmultitask = BasicProblem(
         'SEMP', # Self-employment income past 12 months
         'WAGP', # Wages or salary income past 12 months
         'POVPIP', # Income-to-poverty ratio recode
-        # 'JWMNP', # Travel time to work
-
         # target variables
         'JWMNP', # Travel time to work. Is it greater than 20?
-        # 'PINCP', # Total person's income. Is it greater than 50K?
+        'PINCP', # Total person's income. Is it greater than 50K?
         'ESR', # Employment status recode
         'MIG', # Mobility status (lived here 1 year ago)
         'PUBCOV', # Public health coverage
     ],
     target='PINCP',
-    target_transform=lambda x: x > 50000,
+    target_transform=None,
     group='RAC1P',
     preprocess=multitask_filter,
     postprocess=lambda x: np.nan_to_num(x, -1),
 )
-ACSmultitask.features.remove('JWMNP')
-ACSmultitask.features.append('JWMNP_bin')
-
+# we rename JWMNP so that it doesn't automatically get mapped to 1 as a numerical column (ALL_ATTRS_NUM)
+# the preprocessing script ignores Task.target, so the same isn't required for PINCP
+ACSMultitask.features.remove('JWMNP')
+ACSMultitask.features.append('JWMNP_bin')
 
 
 ##### Data info #####
@@ -145,7 +142,7 @@ ACSTask = {
     'employment': ACSEmployment,
     'travel': ACSTravelTime,
     'real': ACSReal,
-    'multitask': ACSmultitask
+    'multitask': ACSMultitask
 }
 
 # get list of catgorical and numerical attributes
@@ -157,16 +154,7 @@ def split_cat_num(attrs, target_attr=None):
     attrs_num = set(attrs).intersection(all_attrs_num)
     return list(attrs_cat), list(attrs_num)
 
-def filter_outliers(df, numeric_cols):
-    print('Removing outliers')
-    df_temp = df.copy(deep=True)
-    for num_col in numeric_cols:
-        q_lo = df_temp[num_col].quantile(0.01)
-        q_hi = df_temp[num_col].quantile(0.95)
-        df = df[(df[num_col] <= q_hi) & (df[num_col] >= q_lo)]
-    return df
-def get_acs_raw(task, state, year='2018', horizon='1-Year', remove_raw_files=False, return_attrs=False,
-                remove_outliers=False):
+def get_acs_raw(task, state, year='2018', horizon='1-Year', remove_raw_files=False, return_attrs=False):
     data_source = ACSDataSource(survey_year=year, horizon=horizon, survey='person',
                                 root_dir=RAW_DATA_DIR)
     acs_data = data_source.get_data(states=[state], download=True)
@@ -183,18 +171,14 @@ def get_acs_raw(task, state, year='2018', horizon='1-Year', remove_raw_files=Fal
         shutil.rmtree(data_source._root_dir)
 
     attr_cat, attr_num = split_cat_num(all_attrs, target_attr=target_attr)
-    if remove_outliers:
-        print('Removing outliers`')
-        df = filter_outliers(df, attr_num)
-
     if return_attrs:
         return df, ACSTask[task].target, (attr_cat, attr_num)
     return df, ACSTask[task].target
 
-def get_preprocessor_mappings(task, remove_outliers=False):
+def get_preprocessor_mappings(task):
     dict_cat, dict_num = {}, {}
     for state in tqdm(ALL_STATES):
-        df, _, (attr_cat, attr_num) = get_acs_raw(task, state, return_attrs=True, remove_outliers=remove_outliers)
+        df, _, (attr_cat, attr_num) = get_acs_raw(task, state, return_attrs=True)
 
         for attr in attr_cat:
             unique_attrs = set(df[attr].unique().astype(int))
@@ -220,8 +204,8 @@ def get_preprocessor_mappings(task, remove_outliers=False):
     return dict_cat, dict_num
 
 
-def preprocess_acs(task, state, year='2018', horizon='1-Year', remove_outliers=False):
-    df, target = get_acs_raw(task, state, remove_outliers=remove_outliers)
+def preprocess_acs(task, state, year='2018', horizon='1-Year'):
+    df, target = get_acs_raw(task, state)
     
     mappings_dir = os.path.join(RAW_DATA_DIR, year, horizon, 'preprocessor_mappings')
     if not os.path.exists(mappings_dir):
@@ -231,7 +215,7 @@ def preprocess_acs(task, state, year='2018', horizon='1-Year', remove_outliers=F
         with open(mappings_path, 'rb') as handle:
             dict_cat, dict_num = pickle.load(handle)
     else:
-        dict_cat, dict_num = get_preprocessor_mappings(task, remove_outliers=remove_outliers)
+        dict_cat, dict_num = get_preprocessor_mappings(task)
         with open(mappings_path, 'wb') as handle:
             pickle.dump((dict_cat, dict_num), handle)
 
@@ -271,7 +255,6 @@ def get_args():
     parser.add_argument('--year', type=str, default='2018')
     parser.add_argument('--horizon', type=str, default='1-Year')
     parser.add_argument('--keep_raw', action='store_true')
-    parser.add_argument('--remove_outliers', action='store_true')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -280,12 +263,9 @@ if __name__ == '__main__':
     print(args)
     for task, state in itertools.product(args.tasks, args.states):
         print(task, state)
-        df_preprocessed, domain, preprocessor = preprocess_acs(task, state, year=args.year, horizon=args.horizon,
-                                                               remove_outliers=args.remove_outliers)
+        df_preprocessed, domain, preprocessor = preprocess_acs(task, state, year=args.year, horizon=args.horizon)
 
         data_dir = f'./datasets/preprocessed/folktables/{args.horizon}/folktables_{args.year}_{task}_{state}'
-        if args.remove_outliers:
-            data_dir = data_dir + '_outliers'
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
 
