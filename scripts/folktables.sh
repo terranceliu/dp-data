@@ -2,7 +2,7 @@
 
 YEAR=2018
 STATES='CA NY TX FL PA'
-TASKS='income coverage mobility employment travel real multitask'
+TASKS='multitask' # income coverage mobility employment travel real multitask'
 
 python run/preprocess_folktables.py --year $YEAR --tasks $TASKS --states $STATES --keep_raw 
 

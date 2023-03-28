@@ -91,7 +91,7 @@ ACSMultitask = BasicProblem(
         'FER', # Gave birth to child within the past 12 months
         'PUMA', # Public use microdata area cod
         'POWPUMA', # Place of work PUMA
-        'OCC', # Occupation
+        'OCCP', # Occupation
         # numerical features
         'WKHP', # Usual hours worked per week past 12 months
         'AGEP', # AGE
