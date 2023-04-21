@@ -91,7 +91,7 @@ class DataPreprocessor():
     def inverse_transform_cat(self, df):
         for attr in self.attrs_cat:
             enc = self.encoders[attr]
-            df.loc[:, attr] = enc.inverse_transform(df[attr].values)
+            df.loc[:, attr] = enc.inverse_transform(df[attr].values.astype(int))
 
     ##### numerical #####
     def fit_num(self, df):

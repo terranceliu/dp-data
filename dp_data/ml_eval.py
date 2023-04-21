@@ -121,12 +121,12 @@ def get_evaluate_ml(
                     metric_test = scorer(model, X_test, y_test)
                     if verbose: print(f'Train {metric_name}: {metric_train}')
                     if verbose: print(f'Test {metric_name}: {metric_test}')
-                    res.append([target, 'Train', metric_name, metric_train])
-                    res.append([target, 'Test', metric_name, metric_test])
+                    res.append([model_name, target, 'Train', metric_name, metric_train])
+                    res.append([model_name, target, 'Test', metric_name, metric_test])
 
                 end_time = time.time()
                 if verbose: print(f'Total time (s): {end_time - start_time}')
-        return pd.DataFrame(res, columns=['target', 'Eval Data', 'Metric', 'Score'])
+        return pd.DataFrame(res, columns=['Model', 'target', 'Eval Data', 'Metric', 'Score'])
 
     return eval_fn
 
