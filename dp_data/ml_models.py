@@ -10,7 +10,7 @@ MODELS = {
    'DecisionTree': DecisionTreeClassifier(class_weight='balanced'), 
    'KNN': KNeighborsClassifier(),
    # 'LogisticRegression': LogisticRegression(class_weight='balanced', solver='sag', max_iter=10000),
-   'LogisticRegression': LogisticRegression(solver='sag', max_iter=5000),
+   'LogisticRegression': LogisticRegression(solver='lbfgs', max_iter=5000),
    'LinearSVC': LinearSVC(class_weight='balanced'),
    'RandomForest': RandomForestClassifier(class_weight='balanced'),
    'AdaBoost': AdaBoostClassifier(),
