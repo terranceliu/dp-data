@@ -9,9 +9,7 @@ from xgboost import XGBClassifier
 MODELS = {
    'DecisionTree': DecisionTreeClassifier(), 
    'KNN': KNeighborsClassifier(),
-   # 'LogisticRegression': LogisticRegression(class_weight='balanced', solver='sag', max_iter=10000),
-   # 'LogisticRegression': LogisticRegression(solver='sag', max_iter=5000),
-   'LogisticRegression': LogisticRegression(solver='liblinear'), # , penalty='l1'),
+   'LogisticRegression': LogisticRegression(solver='liblinear'),
    'LinearSVC': LinearSVC(),
    'RandomForest': RandomForestClassifier(),
    'AdaBoost': AdaBoostClassifier(),
