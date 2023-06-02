@@ -7,12 +7,13 @@ from xgboost import XGBClassifier
 # from lightgbm import LGBMClassifier
 
 MODELS = {
-   'DecisionTree': DecisionTreeClassifier(class_weight='balanced'), 
+   'DecisionTree': DecisionTreeClassifier(), 
    'KNN': KNeighborsClassifier(),
    # 'LogisticRegression': LogisticRegression(class_weight='balanced', solver='sag', max_iter=10000),
-   'LogisticRegression': LogisticRegression(solver='sag', max_iter=5000),
-   'LinearSVC': LinearSVC(class_weight='balanced'),
-   'RandomForest': RandomForestClassifier(class_weight='balanced'),
+   # 'LogisticRegression': LogisticRegression(solver='sag', max_iter=5000),
+   'LogisticRegression': LogisticRegression(solver='liblinear'), # , penalty='l1'),
+   'LinearSVC': LinearSVC(),
+   'RandomForest': RandomForestClassifier(),
    'AdaBoost': AdaBoostClassifier(),
    'GradientBoosting': GradientBoostingClassifier(),
    'XGBoost': XGBClassifier(),
